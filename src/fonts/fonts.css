@@ -1,0 +1,17 @@
+@font-face {
+    font-family: 'HYDaSong';
+    src: url('../fonts/HYDaSongJ.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'HYJinKaiJ';
+    src: url('../fonts/HYJinKaiJ.ttf') format('truetype');
+}
+
+#j{
+    font-family: 'HYJinKaiJ';
+}
+
+#s{
+    font-family: 'HYDaSong';
+}

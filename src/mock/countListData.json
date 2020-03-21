@@ -1,0 +1,40 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "文物1",
+      "warehouse": "仓库1",
+      "location": "3框1排1号",
+      "num": 4,
+      "numStatus": true,
+      "update_time": "2011-03-11"
+    },
+    {
+      "id": 2,
+      "name": "文物2",
+      "warehouse": "仓库3",
+      "location": "3框1排2号",
+      "num": 4,
+      "numStatus": true,
+      "update_time": "2011-03-11"
+    },
+    {
+      "id": 3,
+      "name": "文物3",
+      "warehouse": "仓库4",
+      "location": "3框1排4号",
+      "num": 4,
+      "numStatus": false,
+      "update_time": "2011-03-11"
+    },
+    {
+      "id": 4,
+      "name": "文物4",
+      "warehouse": "仓库1",
+      "location": "3框1排2号",
+      "num": 4,
+      "numStatus": true,
+      "update_time": "2011-03-11"
+    }
+  ]
+}
