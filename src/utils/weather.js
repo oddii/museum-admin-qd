@@ -5,7 +5,7 @@ const weatherInit = function () {
   WIDGET = {
     CONFIG: {
       "layout": 1,
-      "width": "400",
+      "width": "422",
       "height": "140",
       "background": 5,
       "dataColor": "4A4A4A",

@@ -6,7 +6,7 @@ import 'nprogress/nprogress.css'
 
 const service = axios.create({
   baseURL: config.baseUrl,
-  timeout: 5000
+  timeout: 60000
 })
 
 const errorOptions = {

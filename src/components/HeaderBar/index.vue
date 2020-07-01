@@ -16,14 +16,24 @@
     </el-breadcrumb>
 
     <div class="info-container">
+      <div class="info-inner">
+        <div class="info-name">{{$store.getters.getName}}</div>
+        <div class="info-role">{{$store.getters.getUserRoleName}}</div>
+      </div>
       <div class="info-btn-container" >
       <!--全屏按钮-->
-        <el-tooltip :content="fullBtnToolTip" placement="bottom" effect="light" :enterable="false">
+        <el-tooltip content="全屏" placement="bottom" effect="light" :enterable="false">
           <button class="btn-full" id="btn-full" @click="handleFullScreen">
-            <i class="iconfont" v-if="!isFull">&#xe754;</i>
-            <i class="iconfont" v-else>&#xe603;</i>
+            <i class="el-icon-full-screen"/>
           </button>
         </el-tooltip>
+
+        <el-tooltip content="退出全屏" placement="bottom" effect="light" :enterable="false">
+        <button class="btn-full hidden" id="btn-unFull" @click="handleUnFullScreen">
+          <i class="el-icon-crop"/>
+        </button>
+        </el-tooltip>
+
         <el-tooltip :content="driverBtnToolTip" placement="bottom" effect="light" :enterable="false">
           <button class="btn-driver" id="btn-driver" @click="handleDriver">
             <i class="el-icon-s-promotion"/>
@@ -70,6 +80,9 @@
 import Driver from 'driver.js'
 import 'driver.js/dist/driver.min.css'
 import steps from '../../utils/driverStep'
+import api from '../../api/baseApi'
+import USER_API_URL from '../../api/userApiUrl'
+import menu from '../../utils/menu'
 export default {
   name: 'header-bar',
   created () {
@@ -77,15 +90,36 @@ export default {
   },
   mounted () {
     this.driverInit()
+
+    window.onresize = function () {
+      /**
+         * 监听屏幕发生的变化
+         */
+      this.isFull = !this.isFull
+      const btnFull = document.querySelector('#btn-full') //  全屏按钮
+      const btnUnFull = document.querySelector('#btn-unFull') //  取消全屏按钮
+
+      if (this.isFull) {
+        btnFull.classList.add('hidden')
+        btnUnFull.classList.remove('hidden')
+      } else {
+        btnUnFull.classList.add('hidden')
+        btnFull.classList.remove('hidden')
+      }
+    }
   },
   data () {
     return {
+      userInfo: {
+        username: '',
+        name: '',
+        role: ''
+      },
       driver: null,
       routes: this.$router.options.routes[2].children,
       breadcrumbList: [], //  面包屑list
       isFold: false, //  侧边栏是否为展开状态
       isFull: false, //  是否为全屏状态
-      fullBtnToolTip: '全屏',
       driverBtnToolTip: '引导',
       squareUrl: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif?imageView2/1/w/80/h/80',
       editDlgVisible: false,
@@ -121,34 +155,70 @@ export default {
     },
     handleFullScreen () {
       /**
-       * 全屏、退出全屏
+       * 全屏事件
        */
-      this.isFull = !this.isFull
-      const element = document.documentElement
+      const btnFull = document.querySelector('#btn-full') //  全屏按钮
+      const btnUnFull = document.querySelector('#btn-unFull') //  取消全屏按钮
+      btnFull.classList.add('hidden')
+      btnUnFull.classList.remove('hidden')
 
-      if (!this.isFull) {
-        if (document.exitFullscreen) {
-          document.exitFullscreen()
-        } else if (document.webkitCancelFullScreen) {
-          document.webkitCancelFullScreen()
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen()
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen()
-        }
-        this.fullBtnToolTip = '全屏'
-      } else {
-        if (element.requestFullscreen) {
-          element.requestFullscreen()
-        } else if (element.webkitRequestFullScreen) {
-          element.webkitRequestFullScreen()
-        } else if (element.mozRequestFullScreen) {
-          element.mozRequestFullScreen()
-        } else if (element.msRequestFullscreen) {
-          // IE11
-          element.msRequestFullscreen()
-        }
-        this.fullBtnToolTip = '退出全屏'
+      const element = document.documentElement
+      if (element.requestFullscreen) {
+        element.requestFullscreen()
+      } else if (element.webkitRequestFullScreen) {
+        element.webkitRequestFullScreen()
+      } else if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen()
+      } else if (element.msRequestFullscreen) {
+        // IE11
+        element.msRequestFullscreen()
+      }
+
+      // this.isFull = !this.isFull
+      // const element = document.documentElement
+      //
+      // if (!this.isFull) {
+      //   if (document.exitFullscreen) {
+      //     document.exitFullscreen()
+      //   } else if (document.webkitCancelFullScreen) {
+      //     document.webkitCancelFullScreen()
+      //   } else if (document.mozCancelFullScreen) {
+      //     document.mozCancelFullScreen()
+      //   } else if (document.msExitFullscreen) {
+      //     document.msExitFullscreen()
+      //   }
+      //   this.fullBtnToolTip = '全屏'
+      // } else {
+      //   if (element.requestFullscreen) {
+      //     element.requestFullscreen()
+      //   } else if (element.webkitRequestFullScreen) {
+      //     element.webkitRequestFullScreen()
+      //   } else if (element.mozRequestFullScreen) {
+      //     element.mozRequestFullScreen()
+      //   } else if (element.msRequestFullscreen) {
+      //     // IE11
+      //     element.msRequestFullscreen()
+      //   }
+      //   this.fullBtnToolTip = '退出全屏'
+      // }
+    },
+    handleUnFullScreen () {
+      /**
+       * 退出全屏事件
+       */
+      const btnFull = document.querySelector('#btn-full') //  全屏按钮
+      const btnUnFull = document.querySelector('#btn-unFull') //  取消全屏按钮
+      btnUnFull.classList.add('hidden')
+      btnFull.classList.remove('hidden')
+
+      if (document.exitFullscreen) {
+        document.exitFullscreen()
+      } else if (document.webkitCancelFullScreen) {
+        document.webkitCancelFullScreen()
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen()
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen()
       }
     },
     handleBreadcrumb () {
@@ -199,17 +269,34 @@ export default {
       /**
        * 关闭编辑信息dlg
        */
-      this.editForm.password = ''
+      this.editForm.oldPassword = ''
+      this.editForm.newPassword = ''
       this.editForm.confirmPassword = ''
       this.editDlgVisible = false
     },
-    editPassword () {
+    async editPassword () {
       /**
        * 确定修改信息
        */
       if (this.editForm.newPassword !== this.editForm.confirmPassword) {
         return this.$message.error('两次输入的密码不一致，请重试')
       }
+
+      const userId = window.sessionStorage.getItem('m-id')
+      api.putObjectById(USER_API_URL.updatePasswordById, userId, {
+        oldPassword: this.editForm.oldPassword,
+        newPassword: this.editForm.newPassword
+      })
+        .then(result => {
+          const { status } = result
+          if (status !== 200) return this.$message.error('修改失败，请稍后再试')
+          this.$message.success('修改成功')
+          this.closeEditDlg()
+        }).catch(error => {
+          if (error.response) {
+            this.$message.error(error.response.data.message)
+          }
+        })
     },
     handleLogout () {
       /**
@@ -220,7 +307,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
+        window.sessionStorage.removeItem('m-id')
+        window.sessionStorage.removeItem('m-role')
         window.sessionStorage.removeItem('token')
+
+        this.$store.commit('setMenu', menu)
         this.$message.success('退出登录成功！')
         this.$router.push('/login')
       })
@@ -273,6 +364,16 @@ export default {
     height: 100%;
     line-height: 53px;
     display: flex;
+
+    .info-inner{
+      display: flex;
+      font-weight: 400;
+      font-size: 15px;
+      color: #606266;
+      .info-name{
+        margin-right: 15px;
+      }
+    }
 
     .info-btn-container{
       padding: 0 15px;

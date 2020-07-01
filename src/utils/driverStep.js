@@ -23,6 +23,14 @@ const steps = [
     }
   },
   {
+    element: '.info-container', // 显示高亮的元素
+    popover: {
+      title: '个人信息', // 引导标题
+      description: '点击可修改密码/退出系统', // 引导描述
+      position: 'left' // 引导出现的位置
+    }
+  },
+  {
     element: '#btn-full', // 显示高亮的元素
     popover: {
       title: '全屏按钮', // 引导标题
@@ -35,14 +43,6 @@ const steps = [
     popover: {
       title: '引导按钮', // 引导标题
       description: '点击进行简单引导', // 引导描述
-      position: 'left' // 引导出现的位置
-    }
-  },
-  {
-    element: '#driver-info', // 显示高亮的元素
-    popover: {
-      title: '个人信息', // 引导标题
-      description: '点击可修改密码/退出系统', // 引导描述
       position: 'left' // 引导出现的位置
     }
   },

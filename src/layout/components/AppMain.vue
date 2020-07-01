@@ -2,128 +2,99 @@
   <div class="main-container">
     <!--四个card页-->
     <ul class="card-group clearfix">
-      <li>
+      <li @click="$router.push('/relic/list')">
         <el-card class="card-panel">
           <div class="icon-wrapper icon1">
             <i class="iconfont">&#xe788;</i>
           </div>
           <div class="content-wrapper">
             <div class="content-title">文物数量</div>
-            <div class="content-text">1600000</div>
+            <div class="content-text">{{boxData.relicsCount}}</div>
           </div>
         </el-card>
       </li>
-      <li>
+      <li @click="$router.push('/relic/wait')">
         <el-card class="card-panel">
           <div class="icon-wrapper icon2">
             <i class="iconfont">&#xe786;</i>
           </div>
           <div class="content-wrapper">
             <div class="content-title">待录文物</div>
-            <div class="content-text">51</div>
+            <div class="content-text">{{boxData.requestCount}}</div>
           </div>
         </el-card>
       </li>
-      <li>
+      <li @click="$router.push('/store/list')">
         <el-card class="card-panel">
           <div class="icon-wrapper icon3">
             <i class="iconfont">&#xe783;</i>
           </div>
           <div class="content-wrapper">
             <div class="content-title">仓库总数</div>
-            <div class="content-text">10</div>
+            <div class="content-text">{{boxData.storageCount}}</div>
           </div>
         </el-card>
       </li>
-      <li>
+      <li @click="$router.push('/user/list')">
         <el-card class="card-panel">
           <div class="icon-wrapper icon4">
             <i class="iconfont">&#xe77c;</i>
           </div>
           <div class="content-wrapper">
             <div class="content-title">团队人数</div>
-            <div class="content-text">16</div>
+            <div class="content-text">{{boxData.memberCount}}</div>
           </div>
         </el-card>
       </li>
     </ul>
 
     <!--大图表-->
-    <el-card class="chart-container">
-      <div class="chart-title">{{lineTitle}}</div>
-      <div class="chart">
-        <ve-line :data="lineData" :settings="lineSettings" :colors="chartColors" :extend="lineExtend" :grid="lineGrid"/>
-      </div>
-    </el-card>
-
-    <div class="bottom-container clearfix">
-
-      <el-row>
-        <!--博物馆文物仓库类型图表-->
-        <el-col :span="7">
-          <el-card class="ring-container">
-            <div class="ring-title">{{ringTitle}}</div>
-            <ve-ring :data="ringData" :settings="ringSettings" :extend="ringExtend" height="350px"/>
-          </el-card>
-        </el-col>
-
-        <!--最近待录入文物简单展示-->
-        <el-col :span="11">
-          <el-card class="wait-container">
-            <div class="wait-title">最近待入文物</div>
-            <el-collapse v-model="activeName" accordion>
-              <el-collapse-item :name="index" v-for="(item,index) in waitListData" :key="index">
-                <template slot="title">
-                  <div class="wait-title">{{item.name}}</div>
-                </template>
-                <div class="wait-content">
-                  <p>文物编号：{{item.id}}<span>存储位置：{{item.location}}</span></p>
-                  <p>录入时间：{{item.entry_time}}</p>
-                  <el-button size="small" type="warning" class="btn-wait-insert">立即录入</el-button>
-                </div>
-              </el-collapse-item>
-            </el-collapse>
-          </el-card>
-        </el-col>
-
-        <!--右下角位置-->
-        <el-col :span="6">
-          <div class="bottom-right-container">
-            <!--显示天气-->
-            <el-card class="weather-container">
-              <div id="he-plugin-standard"></div>
-            </el-card>
-
-            <!--最近事件位置-->
-            <el-card class="ad-container">
-              <div class="a-title">最近事件</div>
-              <el-timeline style="margin-top: 15px;">
-                <el-timeline-item v-for="(item, index) in activities" :key="index"
-                                  :timestamp="item.timestamp" :color="item.color">
-                  {{item.content}}
-                </el-timeline-item>
-              </el-timeline>
-            </el-card>
+    <el-row :gutter="25">
+      <el-col :span="17" class="left-container">
+        <el-card>
+          <div class="chart-title">{{lineTitle}}</div>
+          <div class="chart">
+            <ve-line :data="lineData" height="600px"
+                     :settings="lineSettings" :colors="chartColors" :extend="lineExtend" :grid="lineGrid"/>
           </div>
-        </el-col>
-      </el-row>
-    </div>
+        </el-card>
+      </el-col>
 
+      <el-col :span="7" class="right-container">
+        <el-card class="ring-container">
+          <div class="ring-title">{{ringTitle}}</div>
+          <ve-ring :data="ringData" :settings="ringSettings" :extend="ringExtend" height="350px"/>
+        </el-card>
+
+        <el-card class="weather-container">
+          <div id="he-plugin-standard"></div>
+        </el-card>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
 <script>
-import data from '@/mock/lineData.json'
+import api from '../../api/baseApi'
+import STATISTIC_API_URL from '../../api/statisticsApiUrls'
 import weatherInit from '../../utils/weather'
-import waitData from '@/mock/waitListData.json'
 export default {
   name: 'AppMain',
   created () {
     weatherInit()
+    this.getLineData()
+    this.getRingData()
+    this.getBoxData()
   },
   data () {
     return {
-      waitListData: waitData.data,
+      boxData: {
+        relicsCount: 0,
+        requestCount: 0,
+        storageCount: 0,
+        memberCount: 0
+      },
+      waitListData: [],
       chartColors: ['#ff085f', '#3a89fa'],
       lineGrid: {
         show: true,
@@ -160,7 +131,7 @@ export default {
       lineTitle: '过去三十天博物馆文物数量变化图',
       lineData: {
         columns: ['日期', '入库文物', '出库文物'],
-        rows: data.data
+        rows: []
       },
       activeName: '0',
       ringSettings: {
@@ -175,52 +146,71 @@ export default {
         }
       },
       ringData: {
-        columns: ['日期', '访问用户'],
-        rows: [
-          {
-            日期: '1/1',
-            访问用户: 1393
-          },
-          {
-            日期: '1/2',
-            访问用户: 3530
-          },
-          {
-            日期: '1/3',
-            访问用户: 2923
-          },
-          {
-            日期: '1/4',
-            访问用户: 1723
-          },
-          {
-            日期: '1/5',
-            访问用户: 3792
-          },
-          {
-            日期: '1/6',
-            访问用户: 4593
-          },
-          {
-            日期: '1/7',
-            访问用户: 2150
-          },
-          {
-            日期: '1/8',
-            访问用户: 3150
-          }
-        ]
+        columns: ['仓库名称', '文物数量'],
+        rows: []
       },
       ringTitle: '博物馆内各仓库文物数量',
-      activities: [{
-        content: '活动按期开始',
-        timestamp: '2018-04-15',
-        color: '#409EFF'
-      }, {
-        content: '通过审核',
-        timestamp: '2018-04-13',
-        color: '#0bbd87'
-      }]
+      activities: [
+        {
+          content: '活动按期开始',
+          timestamp: '2018-04-15',
+          color: '#409EFF'
+        },
+        {
+          content: '通过审核',
+          timestamp: '2018-04-13',
+          color: '#0bbd87'
+        }]
+    }
+  },
+  methods: {
+    getBoxData () {
+      /**
+       * 获得折线图数据
+       */
+      api.getObject(STATISTIC_API_URL.getBoxData)
+        .then(result => {
+          const { status, data } = result
+          if (status !== 200) return this.$message.error('获取统计数据失败，请刷新重试')
+
+          this.boxData.memberCount = data.memberCount
+          this.boxData.relicsCount = data.relicsCount
+          this.boxData.requestCount = data.requestCount
+          this.boxData.storageCount = data.storageCount
+        })
+        .catch(result => {
+          return this.$message.error('获取统计数据失败，请刷新重试')
+        })
+    },
+    getLineData () {
+      /**
+       * 获得折线图数据
+       */
+      api.getObject(STATISTIC_API_URL.getLineData)
+        .then(result => {
+          const { status, data } = result
+          if (status !== 200) return this.$message.error('过去三十天博物馆文物数量变化数据失败，请刷新重试')
+
+          this.lineData.rows = data
+        })
+        .catch(result => {
+          return this.$message.error('过去三十天博物馆文物数量变化数据失败，请刷新重试')
+        })
+    },
+    getRingData () {
+      /**
+       * 获得扇形图数据
+       */
+      api.getObject(STATISTIC_API_URL.getRingData)
+        .then(result => {
+          const { status, data } = result
+          if (status !== 200) return this.$message.error('博物馆内各仓库文物数量数据失败，请刷新重试')
+
+          this.ringData.rows = data
+        })
+        .catch(result => {
+          return this.$message.error('博物馆内各仓库文物数量数据失败，请刷新重试')
+        })
     }
   }
 }
@@ -321,84 +311,29 @@ export default {
 
     }
 
-    .chart-container {
+    .left-container {
       margin-top: 35px;
 
       .chart-title {
         font-size: 17px;
         color: #666;
-        font-family: 'HYDaSong';
       }
 
       .chart {
-        height: 350px;
+        height: 555px;
       }
     }
 
-    .bottom-container {
-      margin: 35px 0;
+    .right-container{
+      margin-top: 35px;
 
-      .ring-container {
-        float: left;
-        width: 93%;
+      .ring-title{
+        font-size: 17px;
         color: #666;
-
-        .ring-title {
-          height: 35px;
-          font-size: 17px;
-          font-family: 'HYDaSong';
-        }
       }
 
-      .wait-container {
-        float: left;
-        width: 95.5%;
-        color: #666;
-
-        .wait-title {
-          height: 35px;
-          font-size: 17px;
-          font-family: 'HYDaSong';
-        }
-
-        .wait-content{
-          position: relative;
-          p{
-            height: 25px;
-            line-height: 25px;
-            font-size: 15px;
-
-            span{
-              margin-left: 100px;
-            }
-          }
-
-          .btn-wait-insert{
-            position: absolute;
-            right: 20px;
-            bottom: 5px;
-          }
-        }
-      }
-
-      .bottom-right-container {
-        float: left;
-        width: 100%;
-
-        .weather-container {
-          margin-bottom: 33px;
-        }
-
-        .ad-container {
-          height: 212px;
-
-          .a-title{
-            height: 35px;
-            font-size: 17px;
-            font-family: 'HYDaSong';
-            color: #666;
-          }
-        }
+      .ring-container{
+        margin-bottom: 22px;
       }
     }
   }

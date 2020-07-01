@@ -8,32 +8,20 @@
                     clearable size="small" prefix-icon="el-icon-document" style="width: 300px;"/>
       </span>
     </span>
-
-    <!--文件类型-->
-<!--    <span class="file-type">-->
-<!--      <span class="label">文件类型：</span>-->
-<!--      <el-select v-model="typeValue" placeholder="请选择" style="width: 100px" size="small">-->
-<!--        <el-option-->
-<!--          v-for="item in typeOptions"-->
-<!--          :key="item.value"-->
-<!--          :label="item.label"-->
-<!--          :value="item.value">-->
-<!--        </el-option>-->
-<!--      </el-select>-->
-<!--    </span>-->
-
-    <span class="label">导出数据到 Excel：</span>
-    <el-button size="small" type="primary" icon="el-icon-document" @click="outputPage">导出单页</el-button>
-    <el-button size="small" type="primary" icon="el-icon-document-copy" @click="outputAll">导出全部</el-button>
+    <span class="file-export">
+      <span class="label">导出数据到 Excel：</span>
+      <el-button size="small" type="primary" icon="el-icon-document" @click="outputPage">导出单页</el-button>
+      <el-button size="small" type="primary" icon="el-icon-document-copy" v-if="tableType !=='permission'"
+                 @click="outputAll">导出全部</el-button>
+    </span>
   </div>
 </template>
 
 <script>
-// import { utils, writeFile } from 'xlsx'
 import table2excel from 'js-table2excel'
 export default {
   name: 'export-excel',
-  props: ['tableHeaders', 'pageData', 'allData'],
+  props: ['tableHeaders', 'pageData', 'tableType'],
   data () {
     return {
       placeholder: '请输入文件名（默认为excel-list）', //  输入框占位符
@@ -41,46 +29,53 @@ export default {
     }
   },
   methods: {
-    outputExcel () {
-      /**
-       * 导出excel
-       */
-
-      /**
-      if (this.typeValue === '') return this.$message.error('请选择导出文件类型')
-
-      //  获得表格dom
-      const table = document.getElementById(this.tableId)
-      //  创建一个新的工作簿
-      const workbook = utils.book_new()
-      //  转换工作表
-      const worksheet = utils.table_to_sheet(table)
-      // 向工作簿中追加工作表
-      utils.book_append_sheet(workbook, worksheet, 'sheet')
-
-      let fullfilename = `${this.filename}.${this.typeValue}`
-      if (this.filename === '') {
-        fullfilename = `excel-list.${this.typeValue}`
-      }
-
-      // 写入文件
-      writeFile(workbook, fullfilename)
-        .catch((error) => {
-          console.log(error)
-          this.$message.error('发生异常，请重试')
-        })
-       */
+    getTableType () {
+      return this.tableType
     },
     outputPage () {
       /**
        * 导出单页数据到 Excel
        */
+      table2excel(this.tableHeaders, this.pageData, this.filename === '' ? 'excel-list' : this.filename)
     },
     outputAll () {
       /**
        * 导出全部数据到 Excel
        */
-      table2excel(this.tableHeaders, this.allData, this.filename === '' ? 'excel-list' : this.filename)
+      const output = {
+        relic: () => {
+          this.$store.dispatch('getAllRelicList', {
+            tableHeaders: this.tableHeaders,
+            filename: this.filename
+          })
+        },
+        wait: () => {
+          this.$store.dispatch('getAllWaitRelicList', {
+            tableHeaders: this.tableHeaders,
+            filename: this.filename
+          })
+        },
+        record: () => {
+          this.$store.dispatch('getAllRecordList', {
+            tableHeaders: this.tableHeaders,
+            filename: this.filename
+          })
+        },
+        store: () => {
+          this.$store.dispatch('getAllStoreList', {
+            tableHeaders: this.tableHeaders,
+            filename: this.filename
+          })
+        },
+        user: () => {
+          this.$store.dispatch('getAllUserList', {
+            tableHeaders: this.tableHeaders,
+            filename: this.filename
+          })
+        }
+      }
+
+      output[this.getTableType()]()
     }
   }
 }
@@ -88,7 +83,8 @@ export default {
 
 <style lang="less" scoped>
 .export2excel-wrapper{
-  padding: 15px 0;
+  float: left;
+  margin-bottom: 15px;
 
   .label{
     font-size: 14px;
@@ -97,6 +93,7 @@ export default {
   }
 
   .file-name,
+  .file-export,
   .auto-width,
   .file-type{
     margin-right: 50px;

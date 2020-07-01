@@ -36,12 +36,25 @@ import {
   DropdownItem,
   Collapse,
   CollapseItem,
-  MessageBox
+  MessageBox,
+  Timeline,
+  TimelineItem,
+  Upload,
+  Image,
+  Cascader,
+  Alert,
+  Progress,
+  Loading,
+  Tree
 } from 'element-ui'
 
-import Timeline from '../plugins/timeline/index.js'
-import TimelineItem from '../plugins/timeline-item/index.js'
-
+Vue.use(Tree)
+Vue.use(Loading)
+Vue.use(Progress)
+Vue.use(Alert)
+Vue.use(Cascader)
+Vue.use(Image)
+Vue.use(Upload)
 Vue.use(Button)
 Vue.use(Form)
 Vue.use(Input)
@@ -72,6 +85,7 @@ Vue.use(CarouselItem)
 Vue.use(Dialog)
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
+Vue.prototype.$prompt = MessageBox.prompt
 Vue.use(Breadcrumb)
 Vue.use(BreadcrumbItem)
 Vue.use(Tooltip)

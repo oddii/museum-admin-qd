@@ -33,7 +33,7 @@ export default {
   .login-wrapper {
     position: relative;
     height: 100%;
-    background: url("../../assets/login_images/bg.jpg") no-repeat center;
+    background: url("../../assets/login_images/bg.webp") no-repeat center;
 
     .login-container {
       position: absolute;

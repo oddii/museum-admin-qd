@@ -4,8 +4,8 @@
       <!--侧边栏区域-->
       <el-aside width="210px">
         <el-menu :default-active="$route.path" :router="true" :collapse-transition="false"
-                :collapse="isCollapse" background-color="#304156" text-color="#BFCBD9" id="driver-aside">
-          <fragment v-for="item in asideBarList" :key="item.path">
+                 :collapse="isCollapse" background-color="#304156" text-color="#BFCBD9" id="driver-aside">
+          <fragment v-for="item in $store.getters.getMenu" :key="item.path">
             <el-menu-item v-if="!item.alwaysShow" :index="item.path" @click="tagAdd(item.meta.title,item.path)">
               <i :class="item.meta.icon"/>
               <span slot="title">{{item.meta.title}}</span>
@@ -18,7 +18,8 @@
               </template>
               <!--子级菜单-->
               <div v-for="children in item.children" :key="children.path">
-                <el-menu-item  v-if="!children.hidden" :index="children.path" @click="tagAdd(children.meta.title,children.path)" >
+                <el-menu-item v-if="!children.hidden" :index="children.path"
+                              @click="tagAdd(children.meta.title,children.path)">
                   <i :class="children.meta.icon"/>
                   <span slot="title">{{children.meta.title}}</span>
                 </el-menu-item>
@@ -50,11 +51,14 @@
 <script>
 import TagBar from '../components/TagBar/index'
 import HeaderBar from '../components/HeaderBar/index'
+
 export default {
   name: 'Layout',
-  components: { HeaderBar, TagBar },
+  components: {
+    HeaderBar,
+    TagBar
+  },
   created () {
-    // console.log(this.asideBarList)
     this.$bus.$on('fold', () => {
       const asideBar = document.querySelector('.el-aside')
       asideBar.style.width = 'auto'
@@ -69,24 +73,24 @@ export default {
   data () {
     return {
       isCollapse: false,
-      asideBarList: this.$router.options.routes[2].children,
+      asideBarList: [],
       transitionName: ''
     }
   },
   methods: {
     tagAdd (title, path) {
       /**
-       * 向TagBar传递值
-       */
+         * 向TagBar传递值
+         */
       this.$bus.$emit('tag-add', title, path)
     }
   },
   watch: {
     /**
-     * watch $route 决定使用哪种过渡
-     * @param to
-     * @param from
-     */
+       * watch $route 决定使用哪种过渡
+       * @param to
+       * @param from
+       */
     '$route' (to, from) {
       const toDepth = to.path.split('/').length
       const fromDepth = from.path.split('/').length
@@ -97,11 +101,11 @@ export default {
 </script>
 
 <style lang="less">
-.layout-wrapper{
-  height: 100%;
-
-  .el-container{
+  .layout-wrapper {
     height: 100%;
+
+    .el-container {
+      height: 100%;
+    }
   }
-}
 </style>
